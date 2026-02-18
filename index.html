@@ -36,7 +36,7 @@
   // 1) COLOQUE AQUI a URL do webhook do n8n
   // Exemplo (test): https://SEU-N8N/webhook-test/chat-leads
   // Exemplo (prod): https://SEU-N8N/webhook/chat-leads
-  const N8N_WEBHOOK_URL = "https://gcardoso.app.n8n.cloud/webhook-test/chat-leads";
+  const N8N_WEBHOOK_URL = "https://gcardoso.app.n8n.cloud/webhook/chat-leads";
 
   // https://gcardoso.app.n8n.cloud//webhook-test/chat-leads
 
@@ -84,17 +84,21 @@
     inputEl.value = "";
     btnEl.disabled = true;
 
-    const form = new URLSearchParams();
-    form.set("sessionId", sessionId);
-    form.set("message", text);
-    form.set("step", String(step));
-    form.set("answers", JSON.stringify(answers || {}));
-    form.set("pageUrl", location.href);
+    const sessionId = getSessionId();
+    const { step, answers } = getState();
 
-    const res = await fetch(N8N_WEBHOOK_URL, {
-      method: "POST",
-      body: form
-    });
+    try {
+      const res = await fetch(N8N_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          message: text,
+          step,
+          answers,
+          pageUrl: location.href
+        })
+      });
 
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
@@ -126,6 +130,3 @@
 </script>
 </body>
 </html>
-
-
-
