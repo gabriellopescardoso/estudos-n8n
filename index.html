@@ -43,7 +43,7 @@
 
   // Comandos locais
   const END_LOCAL = new Set(["fim", "encerrar", "sair", "/fim", "/encerrar", "/sair"]);
-  const RESET_LOCAL = new Set(["/reset", "reset"]);
+  const RESET_LOCAL = new Set(["/reset", "reset", "/voltar", "voltar"]);
 
   function getSessionId() {
     let id = localStorage.getItem(SESSION_KEY);
@@ -133,17 +133,20 @@
 
       const data = await res.json();
 
-      if (data.reply) addMsg(data.reply, "bot");
+if (data.reply) addMsg(data.reply, "bot");
 
-      // ✅ se o backend encerrou, trava UI e limpa estado
-      if (data.ended === true) {
-        localStorage.removeItem(STATE_KEY);
-        localStorage.removeItem(SESSION_KEY);
-        inputEl.disabled = true;
-        btnEl.disabled = true;
-        inputEl.placeholder = "Conversa encerrada ✅";
-        return;
-      }
+if (data.ended === true) {
+  // pequeno delay para garantir que a mensagem apareça
+  setTimeout(() => {
+    localStorage.removeItem(STATE_KEY);
+    localStorage.removeItem(SESSION_KEY);
+    inputEl.disabled = true;
+    btnEl.disabled = true;
+    inputEl.placeholder = "Conversa encerrada ✅";
+  }, 300);
+  return;
+}
+
 
       setState({
         step: typeof data.step === "number" ? data.step : state.step,
@@ -172,5 +175,6 @@
 
 </body>
 </html>
+
 
 
