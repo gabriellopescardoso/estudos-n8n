@@ -119,7 +119,7 @@
   inputEl.value = "";
 
   // 2) encerra IMEDIATAMENTE no front (garante que o usuário veja)
-  addMsg("Conversa encerrada ✅\nObrigado! Se quiser começar de novo, digite /reset.", "bot");
+  addMsg("Conversa encerrada ✅\nObrigado! Se quiser começar de novo, recarregue a página.", "bot");
   inputEl.disabled = true;
   btnEl.disabled = true;
   inputEl.placeholder = "Conversa encerrada ✅";
@@ -209,6 +209,7 @@ if (data.ended === true) {
 
 </body>
 </html>
+
 
 
 
