@@ -82,7 +82,7 @@
 </div>
 
 <script>
-  // 👉 URL DE PRODUÇÃO DO WEBHOOK (GET)
+  // 🔗 URL DE PRODUÇÃO DO WEBHOOK (GET)
   const N8N_WEBHOOK_URL = "https://gcardoso.app.n8n.cloud/webhook/chat-leads";
 
   const messagesEl = document.getElementById("messages");
@@ -91,6 +91,10 @@
 
   const SESSION_KEY = "chat_session_id";
   const STATE_KEY = "chat_state";
+
+  // 🔄 RESET AUTOMÁTICO AO ABRIR A PÁGINA
+  localStorage.removeItem(STATE_KEY);
+  localStorage.removeItem(SESSION_KEY);
 
   function getSessionId() {
     let id = localStorage.getItem(SESSION_KEY);
@@ -122,6 +126,15 @@
     const text = inputEl.value.trim();
     if (!text) return;
 
+    // comando manual de reset
+    if (text.toLowerCase() === "/reset") {
+      localStorage.removeItem(STATE_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      addMsg("Chat resetado ✅ Recarregue a página.", "bot");
+      inputEl.value = "";
+      return;
+    }
+
     addMsg(text, "me");
     inputEl.value = "";
     btnEl.disabled = true;
@@ -141,9 +154,7 @@
         method: "GET"
       });
 
-      if (!res.ok) {
-        throw new Error("HTTP " + res.status);
-      }
+      if (!res.ok) throw new Error("HTTP " + res.status);
 
       const data = await res.json();
 
@@ -158,7 +169,7 @@
 
     } catch (err) {
       addMsg("Erro ao falar com o servidor 😕", "bot");
-      console.error("Erro:", err);
+      console.error(err);
     } finally {
       btnEl.disabled = false;
       inputEl.focus();
@@ -170,8 +181,8 @@
     if (e.key === "Enter") sendMessage();
   });
 
-  // mensagem inicial
-  addMsg("Olá! Digite algo para começar 🙂");
+  // Mensagem inicial
+  addMsg("Olá! Qual é o seu nome? 🙂");
 </script>
 
 </body>
