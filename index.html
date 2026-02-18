@@ -59,7 +59,7 @@
     localStorage.setItem(STATE_KEY, JSON.stringify(state));
   }
 
-  function resetChatUI(message = "Chat resetado ✅ Digite algo para começar.") {
+  function resetChatUI(message = "Chat resetado ✅ Digite seu nome para começar.") {
     localStorage.removeItem(STATE_KEY);
     localStorage.removeItem(SESSION_KEY);
     inputEl.disabled = false;
@@ -89,20 +89,20 @@
     if (!text) return;
 
     // ✅ reset manual a qualquer momento
-//    if (text.toLowerCase() === "/reset") {
-//      inputEl.value = "";
-//      resetChatUI();
-//      return;
-//    }
+    if (text.toLowerCase() === "voltar") {
+      inputEl.value = "";
+      resetChatUI();
+      return;
+    }
 
     // ✅ encerrar localmente a qualquer momento
-    const endLocal = new Set(["fim", "encerrar", "sair", "/fim", "/encerrar", "/sair", "reset" , "/reset"]);
+    const endLocal = new Set(["fim", "encerrar", "sair", "/fim", "/encerrar", "/sair"]);
     if (endLocal.has(text.toLowerCase())) {
       inputEl.value = "";
       // limpa estado e trava o chat
       localStorage.removeItem(STATE_KEY);
       localStorage.removeItem(SESSION_KEY);
-      endChatUI("Conversa encerrada ✅\nSe quiser começar de novo, digite /reset ou recarregue a página.");
+      endChatUI("Conversa encerrada ✅\nSe quiser começar de novo, digite sair ou recarregue a página.");
       return;
 }
 
@@ -159,9 +159,10 @@
   });
 
   // Mensagem inicial
-  addMsg("Olá! Vamos começar 🙂\nDiga seu nome.\n\nDica: digite 'fim' para encerrar a qualquer momento, ou '/reset' para recomeçar.");
+  addMsg("Olá! Vamos começar 🙂\nDiga seu nome.\n\nDica: digite 'fim' para encerrar a qualquer momento, ou 'voltar' para recomeçar.");
 </script>
 
 </body>
 </html>
+
 
