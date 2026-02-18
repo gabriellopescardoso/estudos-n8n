@@ -31,7 +31,7 @@
 </div>
 
 <script>
-  // 🔗 URL DE PRODUÇÃO DO WEBHOOK (GET)
+  // ✅ URL DE PRODUÇÃO DO WEBHOOK (GET)
   const N8N_WEBHOOK_URL = "https://gcardoso.app.n8n.cloud/webhook/chat-leads";
 
   const messagesEl = document.getElementById("messages");
@@ -40,6 +40,10 @@
 
   const SESSION_KEY = "chat_session_id";
   const STATE_KEY = "chat_state";
+
+  // Comandos locais
+  const END_LOCAL = new Set(["fim", "encerrar", "sair", "/fim", "/encerrar", "/sair"]);
+  const RESET_LOCAL = new Set(["/reset", "reset"]);
 
   function getSessionId() {
     let id = localStorage.getItem(SESSION_KEY);
@@ -59,23 +63,6 @@
     localStorage.setItem(STATE_KEY, JSON.stringify(state));
   }
 
-  function resetChatUI(message = "Chat resetado ✅ Digite seu nome para começar.") {
-    localStorage.removeItem(STATE_KEY);
-    localStorage.removeItem(SESSION_KEY);
-    inputEl.disabled = false;
-    btnEl.disabled = false;
-    inputEl.placeholder = "Digite sua mensagem...";
-    addMsg(message, "bot");
-    inputEl.focus();
-  }
-
-  function endChatUI(message = "Conversa encerrada ✅") {
-    inputEl.disabled = true;
-    btnEl.disabled = true;
-    inputEl.placeholder = "Conversa encerrada ✅";
-    addMsg(message, "bot");
-  }
-
   function addMsg(text, who = "bot") {
     const div = document.createElement("div");
     div.className = "msg " + (who === "me" ? "me" : "bot");
@@ -84,27 +71,47 @@
     messagesEl.scrollTop = messagesEl.scrollHeight;
   }
 
+  function resetChatUI(msg = "Chat resetado ✅ Digite algo para começar.") {
+    localStorage.removeItem(STATE_KEY);
+    localStorage.removeItem(SESSION_KEY);
+    inputEl.disabled = false;
+    btnEl.disabled = false;
+    inputEl.placeholder = "Digite sua mensagem...";
+    addMsg(msg, "bot");
+    inputEl.focus();
+  }
+
+  function endChatUI(msg = "Conversa encerrada ✅") {
+    inputEl.disabled = true;
+    btnEl.disabled = true;
+    inputEl.placeholder = "Conversa encerrada ✅";
+    addMsg(msg, "bot");
+  }
+
   async function sendMessage() {
     const text = inputEl.value.trim();
     if (!text) return;
 
-    // ✅ reset manual a qualquer momento
-    if (text.toLowerCase() === "voltar") {
+    const lower = text.toLowerCase();
+
+    // ✅ reset local imediato
+    if (RESET_LOCAL.has(lower)) {
       inputEl.value = "";
       resetChatUI();
       return;
     }
 
-    // ✅ encerrar localmente a qualquer momento
-    const endLocal = new Set(["fim", "encerrar", "sair", "/fim", "/encerrar", "/sair"]);
-    if (endLocal.has(text.toLowerCase())) {
-      inputEl.value = "";
-      // limpa estado e trava o chat
-      localStorage.removeItem(STATE_KEY);
-      localStorage.removeItem(SESSION_KEY);
-      endChatUI("Conversa encerrada ✅\nSe quiser começar de novo, digite sair ou recarregue a página.");
-      return;
-}
+    // ✅ encerra local imediato (e também deixa o n8n registrar se quiser)
+    // Se você quiser encerrar localmente SEM chamar o n8n, descomente o return abaixo.
+    if (END_LOCAL.has(lower)) {
+      // Opcional: comentar as 3 linhas abaixo se você quiser que "fim" passe pelo n8n
+      // localStorage.removeItem(STATE_KEY);
+      // localStorage.removeItem(SESSION_KEY);
+      // endChatUI("Conversa encerrada ✅\nSe quiser começar de novo, digite /reset.");
+      // inputEl.value = "";
+      // return;
+      // (Deixei sem return para o n8n também receber 'fim' e poder salvar se tiver nome+contato)
+    }
 
     addMsg(text, "me");
     inputEl.value = "";
@@ -126,18 +133,18 @@
 
       const data = await res.json();
 
-      // Mostra reply do bot
       if (data.reply) addMsg(data.reply, "bot");
 
-      // Se o backend disser que encerrou, trava o chat e limpa estado
+      // ✅ se o backend encerrou, trava UI e limpa estado
       if (data.ended === true) {
         localStorage.removeItem(STATE_KEY);
         localStorage.removeItem(SESSION_KEY);
-        endChatUI(); // já exibimos reply acima, aqui só trava a UI
+        inputEl.disabled = true;
+        btnEl.disabled = true;
+        inputEl.placeholder = "Conversa encerrada ✅";
         return;
       }
 
-      // Atualiza estado normal
       setState({
         step: typeof data.step === "number" ? data.step : state.step,
         answers: data.answers || state.answers
@@ -147,7 +154,6 @@
       addMsg("Erro ao falar com o servidor 😕 (" + (err?.message || err) + ")", "bot");
       console.error(err);
     } finally {
-      // se não encerrou, reabilita o botão
       if (!inputEl.disabled) btnEl.disabled = false;
       inputEl.focus();
     }
@@ -158,11 +164,11 @@
     if (e.key === "Enter") sendMessage();
   });
 
-  // Mensagem inicial
-  addMsg("Olá! Vamos começar 🙂\nDiga seu nome.\n\nDica: digite 'fim' para encerrar a qualquer momento, ou 'voltar' para recomeçar.");
+  addMsg(
+    "Olá! Vamos começar 🙂\nDiga seu nome.\n\nComandos:\n- digite 'fim' para encerrar a qualquer momento\n- digite '/reset' para recomeçar",
+    "bot"
+  );
 </script>
 
 </body>
 </html>
-
-
