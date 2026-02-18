@@ -84,21 +84,17 @@
     inputEl.value = "";
     btnEl.disabled = true;
 
-    const sessionId = getSessionId();
-    const { step, answers } = getState();
+    const form = new URLSearchParams();
+    form.set("sessionId", sessionId);
+    form.set("message", text);
+    form.set("step", String(step));
+    form.set("answers", JSON.stringify(answers || {}));
+    form.set("pageUrl", location.href);
 
-    try {
-      const res = await fetch(N8N_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          message: text,
-          step,
-          answers,
-          pageUrl: location.href
-        })
-      });
+    const res = await fetch(N8N_WEBHOOK_URL, {
+      method: "POST",
+      body: form
+    });
 
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
@@ -130,5 +126,6 @@
 </script>
 </body>
 </html>
+
 
 
