@@ -89,11 +89,22 @@
     if (!text) return;
 
     // ✅ reset manual a qualquer momento
-    if (text.toLowerCase() === "/reset") {
+//    if (text.toLowerCase() === "/reset") {
+//      inputEl.value = "";
+//      resetChatUI();
+//      return;
+//    }
+
+    // ✅ encerrar localmente a qualquer momento
+    const endLocal = new Set(["fim", "encerrar", "sair", "/fim", "/encerrar", "/sair", "reset" , "/reset"]);
+    if (endLocal.has(text.toLowerCase())) {
       inputEl.value = "";
-      resetChatUI();
+      // limpa estado e trava o chat
+      localStorage.removeItem(STATE_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      endChatUI("Conversa encerrada ✅\nSe quiser começar de novo, digite /reset ou recarregue a página.");
       return;
-    }
+}
 
     addMsg(text, "me");
     inputEl.value = "";
@@ -153,3 +164,4 @@
 
 </body>
 </html>
+
