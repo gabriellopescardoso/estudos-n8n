@@ -105,11 +105,11 @@
     // Se você quiser encerrar localmente SEM chamar o n8n, descomente o return abaixo.
     if (END_LOCAL.has(lower)) {
       // Opcional: comentar as 3 linhas abaixo se você quiser que "fim" passe pelo n8n
-      // localStorage.removeItem(STATE_KEY);
-      // localStorage.removeItem(SESSION_KEY);
-      // endChatUI("Conversa encerrada ✅\nSe quiser começar de novo, digite /reset.");
-      // inputEl.value = "";
-      // return;
+      localStorage.removeItem(STATE_KEY);
+      /localStorage.removeItem(SESSION_KEY);
+      endChatUI("Conversa encerrada ✅\nSe quiser começar de novo, digite /reset.");
+      inputEl.value = "";
+      return;
       // (Deixei sem return para o n8n também receber 'fim' e poder salvar se tiver nome+contato)
     }
 
@@ -175,6 +175,7 @@ if (data.ended === true) {
 
 </body>
 </html>
+
 
 
 
